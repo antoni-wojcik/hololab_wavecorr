@@ -1,0 +1,10 @@
+CairoSVG==2.7.1
+matplotlib==3.10.6
+numpy==2.3.3
+opencv_python==4.11.0.86
+pandas==2.3.2
+pylablib==1.4.3
+scipy==1.16.2
+skimage==0.0
+torch==2.2.2
+tqdm==4.67.1
