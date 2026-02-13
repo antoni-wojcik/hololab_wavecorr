@@ -1,7 +1,7 @@
 # HoloLab_wavecorr
 A Python package for measuring the phase and amplitude of incident wavefronts in SLM-based Fourier optical systems to characterize and correct aberrations. It can measure wavefronts,  Seidel aberrations coefficients, compute and apply affine transforms between experimental and target images, and generate holograms incorporating aberration corrections. 
 
-The package contains code used to obtain results for the *"Fourier-plane wavefront and SLM aberration characterization via iterative scanning of beam deflector segments"* paper as well as the *"Seidel-based position-dependent aberration correction in Fourier holography" paper.
+The package contains code used to obtain results for the *"Fourier-plane wavefront and SLM aberration characterization via iterative scanning of beam deflector segments"* paper as well as the *"Seidel-based position-dependent aberration correction in Fourier holography"* paper.
 
 This package is a subset of a larger codebase, containing only the functionality directly relevant to the methods and results presented in the associated paper.
 
