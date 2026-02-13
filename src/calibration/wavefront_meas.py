@@ -78,8 +78,9 @@ class WavefrontMeasurer:
         self._select_roi(capture)
 
         # Analyse the ROI
-        if not verbose:
-            self.roi.set_camera_roi(self.camera)
+        # if not verbose:
+        #     self.roi.set_camera_roi(self.camera)
+            # pass
         capture = self.camera.capture()
         self.roi.analyse(capture, detect_blobs=True)
         central_roi_com = self.roi.com
@@ -90,19 +91,48 @@ class WavefrontMeasurer:
         if exp is not None:
             self.save_rois = False
             capture_roi = np.copy(self.roi.roi)
-            capture_thres = np.minimum(capture_roi, 1024 * 0.5)
+            # capture_thres = np.minimum(capture_roi, 1024 * 0.5)
+            capture_thres = capture_roi
             exp.save_image(capture_thres, f"roi_reference")
             exp.save_npy(capture_roi, f"roi_reference")
+
+        def spiral_indices_(P, Q):
+            # Start at center (integer center, as requested)
+            r = P // 2
+            c = Q // 2
+
+            yield (r, c)
+
+            # Directions: right, down, left, up (clockwise)
+            directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+
+            step_len = 1
+            emitted = 1
+            total = P * Q
+
+            while emitted < total:
+                for d in range(4):
+                    dr, dc = directions[d]
+                    for _ in range(step_len):
+                        r += dr
+                        c += dc
+                        if 0 <= r < P and 0 <= c < Q:
+                            yield (r, c)
+                            emitted += 1
+                    # Increase step length after completing down or up
+                    if d % 2 == 1:
+                        step_len += 1
         
         def _get_shift(grad, tile_pos):
             # Get the tilted tile and place it on the SLM, then display the pattern and capture the image
-            tile = self._get_tilted_tile(grad[0] + self.grad_ref_x, grad[1] + self.grad_ref_x)
+            tile = self._get_tilted_tile(grad[0] + self.grad_ref_x, grad[1] + self.grad_ref_y)
             # tile = self.gr_tile + tilt
             pattern = self._place_tile(tile=tile, tile_pos=tile_pos)
             self.slm.display(pattern)
             capture = self.camera.capture()
 
             # Analyse the ROI
+            print("Analysing tile at position ", tile_pos, " with gradient ", grad)
             self.roi.analyse(capture, detect_blobs=True)
             current_com = self.roi.com
 
@@ -111,7 +141,7 @@ class WavefrontMeasurer:
 
             if self.save_rois:
                 capture_roi = np.copy(self.roi.roi)
-                capture_thres = np.minimum(capture_roi, 1024 * 3e-2)
+                capture_thres = capture_roi # np.minimum(capture_roi, 1024 * 3e-2)
                 exp.save_image(capture_thres, f"roi{tile_pos[0]}{tile_pos[1]}", separate_dir=True)
                 exp.save_npy(capture_roi, f"roi{tile_pos[0]}{tile_pos[1]}", separate_dir=True)
                 text = f"""Tile {tile_pos}:
@@ -125,10 +155,11 @@ ROI size: {self.roi.roi.shape}
                 exp.save_text(text, f"roi{tile_pos[0]}{tile_pos[1]}", separate_dir=True)
 
             # Display image seen by the camera
-            # if verbose:
-            #     plt.imshow(capture_thres, cmap='gray')
-            #     plt.colorbar()
-            #     plt.show()
+            if verbose:
+                # plt.imshow(self.roi.roi, cmap='gray')
+                plt.imshow(capture, cmap='gray')
+                plt.colorbar()
+                plt.show()
 
             return shift
  
@@ -148,8 +179,9 @@ ROI size: {self.roi.roi.shape}
         self.gradients = np.zeros((self.tile_positions[0], self.tile_positions[1], 2))
         num_steps_final = np.zeros(self.tile_positions, dtype=int)
 
-        for i in range(self.tile_positions[0]):
-            for j in range(self.tile_positions[1]):
+        # for i in range(self.tile_positions[0]):
+        #     for j in range(self.tile_positions[1]):
+        for i, j in spiral_indices_(self.tile_positions[0], self.tile_positions[1]):
                 tile_pos = (i, j)
 
                 if verbose and tile_pos in [(0, 0), (0, 1), (1, 1), (1, 6)]:
@@ -240,8 +272,6 @@ ROI size: {self.roi.roi.shape}
  
                 # Store the gradient of the tile
                 self.gradients[i, j, :] = best_grad
-
-                print(mean_shift)
  
                 tqdm_bar.set_postfix({"tile intensity": f"{self.tile_ints[i, j]:.6f}"})
  

@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 from src.io.experiment import ExpIO
 
 
-target_path = r"data\experiments\2025-05-08_wavefront_correction_test\f6cm_exact\target.npy"
-exp_path = r"data\experiments\2025-05-08_wavefront_correction_test\f6cm_exact\capture_6.npy"
+target_path = r"data\experiments\f6cm_exact\target.npy"
+exp_path = r"data\experiments\6cm_exact\capture.npy"
 
 target_img = np.load(target_path)
 exp_img = np.load(exp_path)
